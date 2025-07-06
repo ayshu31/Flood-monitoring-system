@@ -1,0 +1,50 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <NewPing.h>
+
+#define TRIGGER_PIN 18
+#define ECHO_PIN 17
+#define MAX_DISTANCE 200
+
+#define BUZZER_PIN 12
+#define RED_LED_PIN 19
+#define BLUE_LED_PIN 26
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+
+void setup() {
+  Serial.begin(9600);
+  lcd.init();
+  lcd.backlight();
+
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(BLUE_LED_PIN, OUTPUT);
+}
+
+void loop() {
+  float distance = sonar.ping_cm();
+
+  lcd.clear();
+  lcd.setCursor(0, 1);
+  Serial.println(distance);
+  delay(2000);
+
+  if (distance < 100) {
+    digitalWrite(RED_LED_PIN, HIGH);
+    digitalWrite(BLUE_LED_PIN, LOW);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Danger!");
+    tone(BUZZER_PIN, 1000, 1000);
+  } else {
+    digitalWrite(RED_LED_PIN, LOW);
+    digitalWrite(BLUE_LED_PIN, HIGH);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Safe");
+  }
+
+  delay(1000);
+}
